@@ -1,0 +1,13 @@
+import { apiClient } from "./client"
+
+export const registrationUserQuery = async (username: string, password: string) => {
+    return await apiClient.post("/users/registration", {
+        username, password
+    })
+}
+
+export const loginUserQuery = async (username: string, password: string) => {
+    return await apiClient.post("/users/login", {
+        username, password
+    })
+}

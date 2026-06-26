@@ -5,6 +5,8 @@ import { HomePage } from './pages/Home/Home.tsx';
 import { LoginPage } from './pages/Login/Login.tsx';
 import { RegistrationPage } from './pages/Registration/Registration.tsx';
 import { CryptoPage } from './pages/Crypto/Crypto.tsx';
+import "antd/dist/reset.css";
+import { ConfigProvider, theme } from 'antd';
 
 const router = createBrowserRouter([
   {
@@ -29,6 +31,14 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <ConfigProvider theme={{
+      algorithm: theme.darkAlgorithm,
+      token: {
+        colorPrimary: "#7c3aed",
+        borderRadius: 12,
+      },
+    }}>
+      <RouterProvider router={router} />
+    </ConfigProvider>
   </StrictMode>,
 )
