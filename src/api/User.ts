@@ -1,4 +1,4 @@
-import { apiClient } from "./client"
+import { apiClient } from "@/api/client"
 
 export const registrationUserQuery = async (username: string, password: string) => {
     return await apiClient.post("/users/registration", {

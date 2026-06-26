@@ -8,7 +8,7 @@ import {
   Typography,
 } from "antd";
 
-import { registrationUserQuery } from "../../api/User";
+import { registrationUserQuery } from "@/api/User";
 import { AxiosError } from "axios";
 
 const { Title, Text } = Typography;
@@ -20,7 +20,7 @@ type RegistrationForm = {
 
 const userAlreadyExistError = "Пользователь с таким именем уже существует"
 
-export const LoginPage = () => {
+export const RegistrationPage = () => {
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
 

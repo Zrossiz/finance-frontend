@@ -8,7 +8,7 @@ import {
   Typography,
 } from "antd";
 
-import { loginUserQuery } from "../../api/User";
+import { loginUserQuery } from "@/api/User";
 
 const { Title, Text } = Typography;
 
