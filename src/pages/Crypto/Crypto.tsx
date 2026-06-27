@@ -1,5 +1,3 @@
 export const CryptoPage = () => {
-    return (
-        <div>crypto page</div>
-    )
-}
+  return <div>crypto page</div>;
+};
