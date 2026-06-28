@@ -11,6 +11,11 @@
     "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
     "prepare": "husky"
   },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,css,md,json}": [
+      "prettier --write --config ./.prettierrc"
+    ]
+  },
   "dependencies": {
     "antd": "^6.4.5",
     "axios": "^1.18.1",
