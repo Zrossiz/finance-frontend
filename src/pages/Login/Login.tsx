@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Alert, Button, Card, Form, Input, Typography } from 'antd'
+import { useState } from 'react';
+import { Alert, Button, Card, Form, Input, Typography } from 'antd';
 
 import { loginUserQuery } from '@/api/User';
 

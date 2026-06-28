@@ -1,4 +1,4 @@
-import { apiClient } from '@/api/client';
+import { apiClient, refreshClient } from '@/api/client';
 
 export const registrationUserQuery = async (username: string, password: string) => {
   return await apiClient.post('/users/registration', {
@@ -12,4 +12,8 @@ export const loginUserQuery = async (username: string, password: string) => {
     username,
     password,
   });
+};
+
+export const refreshTokensQuery = async () => {
+  return await refreshClient.put('/users/refresh');
 };
