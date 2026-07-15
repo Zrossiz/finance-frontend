@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Button, InputNumber, message, Popconfirm, Space, Table, Typography } from 'antd';
+import { Button, InputNumber, message, Popconfirm, Space, Table, Tooltip, Typography } from 'antd';
 
 import type { ColumnsType } from 'antd/es/table';
 import type { CryptoPosition } from '@/types';
+
+import { CheckOutlined, CloseOutlined, DeleteOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -10,7 +12,11 @@ type CryptoTableProps = {
   positions: CryptoPosition[];
   loading?: boolean;
 
-  onUpdatePosition: (positionId: string, amount: string, avgPriceUsdCents: number) => Promise<void>;
+  onUpdatePosition: (
+    positionId: string,
+    amount: string,
+    avgPriceUsdCents: number | null,
+  ) => Promise<void>;
 
   onDeletePosition: (positionId: string) => Promise<void>;
 };
@@ -251,18 +257,27 @@ export const CryptoTable = ({
           <Space>
             {hasChanges && (
               <>
-                <Button
-                  type="primary"
-                  loading={isSaving}
-                  disabled={isDeleting}
-                  onClick={() => void handleSave(position)}
-                >
-                  Save
-                </Button>
-
-                <Button disabled={isSaving || isDeleting} onClick={() => handleCancel(position.id)}>
-                  Cancel
-                </Button>
+                {' '}
+                <Tooltip title="Save changes">
+                  {' '}
+                  <Button
+                    type="primary"
+                    shape="circle"
+                    icon={<CheckOutlined />}
+                    loading={isSaving}
+                    disabled={isDeleting}
+                    onClick={() => void handleSave(position)}
+                  />{' '}
+                </Tooltip>{' '}
+                <Tooltip title="Cancel changes">
+                  {' '}
+                  <Button
+                    shape="circle"
+                    icon={<CloseOutlined />}
+                    disabled={isSaving || isDeleting}
+                    onClick={() => handleCancel(position.id)}
+                  />{' '}
+                </Tooltip>{' '}
               </>
             )}
 
@@ -271,16 +286,21 @@ export const CryptoTable = ({
               description={`Are you sure you want to delete ${position.ticker.toUpperCase()}?`}
               okText="Delete"
               cancelText="Cancel"
-              okButtonProps={{
-                danger: true,
-                loading: isDeleting,
-              }}
+              okButtonProps={{ danger: true, loading: isDeleting }}
               disabled={isSaving || isDeleting}
-              onConfirm={() => handleDelete(position)}
+              onConfirm={() => void handleDelete(position)}
             >
-              <Button danger loading={isDeleting} disabled={isSaving}>
-                Delete
-              </Button>
+              {' '}
+              <Tooltip title="Delete position">
+                {' '}
+                <Button
+                  danger
+                  shape="circle"
+                  icon={<DeleteOutlined />}
+                  loading={isDeleting}
+                  disabled={isSaving}
+                />{' '}
+              </Tooltip>{' '}
             </Popconfirm>
           </Space>
         );
@@ -295,7 +315,6 @@ export const CryptoTable = ({
       columns={columns}
       loading={loading}
       pagination={false}
-      scroll={{ x: 1000 }}
     />
   );
 };
