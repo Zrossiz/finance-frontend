@@ -1,0 +1,28 @@
+import { apiClient } from './client';
+
+export const getUserCryptoPositions = async () => {
+  return apiClient.get('/cryptos');
+};
+
+export const createCryptoPosition = async (
+  ticker: string,
+  amount: string,
+  avgPriceUSDCents?: number,
+) => {
+  return apiClient.post('/cryptos', {
+    ticker,
+    amount,
+    avg_price_usd_cents: avgPriceUSDCents,
+  });
+};
+
+export const updateCryptoPosition = async (
+  id: string,
+  amount: string,
+  avgPriceUSDCents: string,
+) => {
+  return apiClient.put(`/cryptos/${id}`, {
+    amount,
+    avg_price_usd_cents: avgPriceUSDCents,
+  });
+};

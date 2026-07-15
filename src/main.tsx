@@ -12,12 +12,10 @@ const router = createBrowserRouter([
   {
     path: '/',
     Component: HomePage,
-    children: [
-      {
-        path: '/crypto',
-        Component: CryptoPage,
-      },
-    ],
+  },
+  {
+    path: '/crypto',
+    Component: CryptoPage,
   },
   {
     path: '/login',
