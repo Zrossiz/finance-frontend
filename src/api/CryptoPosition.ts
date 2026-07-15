@@ -4,6 +4,10 @@ export const getUserCryptoPositions = async () => {
   return apiClient.get('/cryptos');
 };
 
+export const deleteCryptoPosition = async (id: string) => {
+  return apiClient.delete(`/cryptos/${id}`);
+};
+
 export const createCryptoPosition = async (
   ticker: string,
   amount: string,
@@ -19,7 +23,7 @@ export const createCryptoPosition = async (
 export const updateCryptoPosition = async (
   id: string,
   amount: string,
-  avgPriceUSDCents: string,
+  avgPriceUSDCents: number | null,
 ) => {
   return apiClient.put(`/cryptos/${id}`, {
     amount,

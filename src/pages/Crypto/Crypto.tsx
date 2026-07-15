@@ -1,24 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Alert, Card, Spin, Table, Typography } from 'antd';
+import { Alert, Card, Typography } from 'antd';
 
-import { getUserCryptoPositions, normalizeApiError } from '@/api';
+import {
+  deleteCryptoPosition,
+  getUserCryptoPositions,
+  normalizeApiError,
+  updateCryptoPosition,
+} from '@/api';
 import { toCamelCase } from '@/helpers/toCamelCase';
 
-import type { CryptoPosition, GetUserCryptoPositionsRes } from '@/types';
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
+import type { GetUserCryptoPositionsRes } from '@/types';
+import { CryptoChart, CryptoTable } from '@/components';
 
 const { Title, Text } = Typography;
-
-const CHART_COLORS = [
-  '#5B8FF9',
-  '#61DDAA',
-  '#F6BD16',
-  '#E8684A',
-  '#9270CA',
-  '#6DC8EC',
-  '#FF99C3',
-  '#8DDE6A',
-];
 
 export const CryptoPage = () => {
   const [cryptoPositions, setCryptoPositions] = useState<GetUserCryptoPositionsRes | null>(null);
@@ -45,6 +39,21 @@ export const CryptoPage = () => {
     }
   };
 
+  const handleUpdatePosition = async (
+    positionId: string,
+    amount: string,
+    avgPriceUsdCents: number | null,
+  ) => {
+    await updateCryptoPosition(positionId, amount, avgPriceUsdCents);
+
+    await getData();
+  };
+
+  const handleDeletePosition = async (positionId: string) => {
+    await deleteCryptoPosition(positionId);
+    await getData();
+  };
+
   useEffect(() => {
     const loadData = async () => {
       await getData();
@@ -52,70 +61,6 @@ export const CryptoPage = () => {
 
     void loadData();
   }, []);
-
-  const chartData =
-    cryptoPositions?.positions
-      .map((position) => ({
-        name: position.ticker.toUpperCase(),
-        value: Number(position.totalPriceUsd),
-      }))
-      .filter((position) => position.value > 0) ?? [];
-
-  const columns = [
-    {
-      title: 'Ticker',
-      dataIndex: 'ticker',
-      key: 'ticker',
-    },
-    {
-      title: 'Amount',
-      dataIndex: 'amount',
-      key: 'amount',
-    },
-    {
-      title: 'Position value',
-      dataIndex: 'totalPriceUsd',
-      key: 'totalPriceUsd',
-      render: (value: string) =>
-        `$${Number(value).toLocaleString(undefined, {
-          maximumFractionDigits: 2,
-        })}`,
-    },
-    {
-      title: 'Average price',
-      dataIndex: 'avgPriceUsdCents',
-      key: 'avgPriceUsdCents',
-      render: (value: number | null) =>
-        value !== null
-          ? `$${(value / 100).toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}`
-          : '-',
-    },
-    {
-      title: 'Profit',
-      dataIndex: 'profitUsd',
-      key: 'profitUsd',
-      render: (value: string) => {
-        const profit = Number(value);
-
-        return (
-          <Text
-            style={{
-              color: profit > 0 ? '#52c41a' : profit < 0 ? '#ff4d4f' : undefined,
-              fontWeight: 600,
-            }}
-          >
-            $
-            {profit.toLocaleString(undefined, {
-              maximumFractionDigits: 2,
-            })}
-          </Text>
-        );
-      },
-    },
-  ];
 
   return (
     <>
@@ -182,59 +127,14 @@ export const CryptoPage = () => {
               />
             )}
 
-            {chartData.length > 0 && (
-              <div
-                style={{
-                  width: '100%',
-                  height: 360,
-                  marginTop: 32,
-                }}
-              >
-                <Title level={4}>Portfolio allocation</Title>
+            <CryptoChart positions={cryptoPositions.positions} />
 
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={chartData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="45%"
-                      innerRadius={70}
-                      outerRadius={120}
-                      paddingAngle={2}
-                      label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(1)}%`}
-                    >
-                      {chartData.map((item, index) => (
-                        <Cell key={item.name} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                      ))}
-                    </Pie>
-
-                    <Tooltip
-                      formatter={(value) => [
-                        `$${Number(value).toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}`,
-                        'Position value',
-                      ]}
-                    />
-
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-
-            <Spin spinning={loading}>
-              <Table<CryptoPosition>
-                style={{ marginTop: 56 }}
-                rowKey="id"
-                dataSource={cryptoPositions?.positions ?? []}
-                columns={columns}
-                pagination={false}
-              />
-            </Spin>
+            <CryptoTable
+              positions={cryptoPositions.positions}
+              loading={loading}
+              onUpdatePosition={handleUpdatePosition}
+              onDeletePosition={handleDeletePosition}
+            />
           </Card>
         </div>
       ) : (

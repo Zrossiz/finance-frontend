@@ -1,53 +1,118 @@
 import { useState } from 'react';
-import { Button, InputNumber, message, Space, Table, Typography } from 'antd';
+import { Button, InputNumber, message, Popconfirm, Space, Table, Typography } from 'antd';
 
 import type { ColumnsType } from 'antd/es/table';
 import type { CryptoPosition } from '@/types';
 
 const { Text } = Typography;
 
-type CryptoPositionsTableProps = {
+type CryptoTableProps = {
   positions: CryptoPosition[];
   loading?: boolean;
-  onUpdatePosition: (positionId: string, amount: string) => Promise<void>;
+
+  onUpdatePosition: (positionId: string, amount: string, avgPriceUsdCents: number) => Promise<void>;
+
+  onDeletePosition: (positionId: string) => Promise<void>;
 };
 
-export const CryptoPositionsTable = ({
+export const CryptoTable = ({
   positions,
   loading = false,
   onUpdatePosition,
-}: CryptoPositionsTableProps) => {
+  onDeletePosition,
+}: CryptoTableProps) => {
   const [editedAmounts, setEditedAmounts] = useState<Record<string, string>>({});
-  const [savingPositionId, setSavingPositionId] = useState<string | null>(null);
+  const [editedAvgPrices, setEditedAvgPrices] = useState<Record<string, string>>({});
 
-  const getAmount = (position: CryptoPosition) => editedAmounts[position.id] ?? position.amount;
+  const [savingPositionId, setSavingPositionId] = useState<string | null>(null);
+  const [deletingPositionId, setDeletingPositionId] = useState<string | null>(null);
+
+  const getAmount = (position: CryptoPosition): string => {
+    return editedAmounts[position.id] ?? position.amount;
+  };
+
+  const getAvgPriceUsd = (position: CryptoPosition): string => {
+    if (editedAvgPrices[position.id] !== undefined) {
+      return editedAvgPrices[position.id];
+    }
+
+    if (position.avgPriceUsdCents === null) {
+      return '';
+    }
+
+    return String(position.avgPriceUsdCents / 100);
+  };
 
   const handleAmountChange = (positionId: string, value: string | null) => {
     setEditedAmounts((current) => ({
       ...current,
-      [positionId]: value ?? '0',
+      [positionId]: value ?? '',
     }));
+  };
+
+  const handleAvgPriceChange = (positionId: string, value: string | null) => {
+    setEditedAvgPrices((current) => ({
+      ...current,
+      [positionId]: value ?? '',
+    }));
+  };
+
+  const clearEditedPosition = (positionId: string) => {
+    setEditedAmounts((current) => {
+      const updated = { ...current };
+      delete updated[positionId];
+
+      return updated;
+    });
+
+    setEditedAvgPrices((current) => {
+      const updated = { ...current };
+      delete updated[positionId];
+
+      return updated;
+    });
   };
 
   const handleSave = async (position: CryptoPosition) => {
     const amount = getAmount(position);
+    const avgPriceUsd = getAvgPriceUsd(position);
 
-    if (Number(amount) < 0) {
+    const numericAmount = Number(amount);
+
+    if (amount.trim() === '' || !Number.isFinite(numericAmount)) {
+      void message.error('Enter a valid amount');
+      return;
+    }
+
+    if (numericAmount < 0) {
       void message.error('Amount cannot be negative');
       return;
+    }
+
+    let avgPriceUsdCents: number | null = null;
+
+    if (avgPriceUsd.trim() !== '') {
+      const numericAvgPriceUsd = Number(avgPriceUsd);
+
+      if (!Number.isFinite(numericAvgPriceUsd)) {
+        void message.error('Enter a valid average price');
+        return;
+      }
+
+      if (numericAvgPriceUsd < 0) {
+        void message.error('Average price cannot be negative');
+        return;
+      }
+
+      avgPriceUsdCents = Math.round(numericAvgPriceUsd * 100);
     }
 
     try {
       setSavingPositionId(position.id);
 
-      await onUpdatePosition(position.id, amount);
+      await onUpdatePosition(position.id, amount, avgPriceUsdCents);
 
-      setEditedAmounts((current) => {
-        const updated = { ...current };
-        delete updated[position.id];
-
-        return updated;
-      });
+      clearEditedPosition(position.id);
 
       void message.success(`${position.ticker.toUpperCase()} position updated`);
     } catch {
@@ -58,12 +123,23 @@ export const CryptoPositionsTable = ({
   };
 
   const handleCancel = (positionId: string) => {
-    setEditedAmounts((current) => {
-      const updated = { ...current };
-      delete updated[positionId];
+    clearEditedPosition(positionId);
+  };
 
-      return updated;
-    });
+  const handleDelete = async (position: CryptoPosition) => {
+    try {
+      setDeletingPositionId(position.id);
+
+      await onDeletePosition(position.id);
+
+      clearEditedPosition(position.id);
+
+      void message.success(`${position.ticker.toUpperCase()} position deleted`);
+    } catch {
+      void message.error('Failed to delete position');
+    } finally {
+      setDeletingPositionId(null);
+    }
   };
 
   const columns: ColumnsType<CryptoPosition> = [
@@ -77,39 +153,42 @@ export const CryptoPositionsTable = ({
       title: 'Amount',
       key: 'amount',
       render: (_, position) => {
-        const amount = getAmount(position);
-        const hasChanges = amount !== position.amount;
+        const isSaving = savingPositionId === position.id;
+        const isDeleting = deletingPositionId === position.id;
 
         return (
-          <Space>
-            <InputNumber<string>
-              stringMode
-              min="0"
-              step="0.0001"
-              value={amount}
-              onChange={(value) => handleAmountChange(position.id, value)}
-              style={{ width: 150 }}
-            />
+          <InputNumber<string>
+            stringMode
+            min="0"
+            step="0.0001"
+            value={getAmount(position)}
+            disabled={isSaving || isDeleting}
+            onChange={(value) => handleAmountChange(position.id, value)}
+            style={{ width: 140 }}
+          />
+        );
+      },
+    },
+    {
+      title: 'Average price',
+      key: 'avgPriceUsdCents',
+      render: (_, position) => {
+        const isSaving = savingPositionId === position.id;
+        const isDeleting = deletingPositionId === position.id;
 
-            {hasChanges && (
-              <>
-                <Button
-                  type="primary"
-                  loading={savingPositionId === position.id}
-                  onClick={() => void handleSave(position)}
-                >
-                  Save
-                </Button>
-
-                <Button
-                  disabled={savingPositionId === position.id}
-                  onClick={() => handleCancel(position.id)}
-                >
-                  Cancel
-                </Button>
-              </>
-            )}
-          </Space>
+        return (
+          <InputNumber<string>
+            stringMode
+            min="0"
+            step="0.01"
+            precision={2}
+            prefix="$"
+            placeholder="0.00"
+            value={getAvgPriceUsd(position)}
+            disabled={isSaving || isDeleting}
+            onChange={(value) => handleAvgPriceChange(position.id, value)}
+            style={{ width: 140 }}
+          />
         );
       },
     },
@@ -117,23 +196,13 @@ export const CryptoPositionsTable = ({
       title: 'Position value',
       dataIndex: 'totalPriceUsd',
       key: 'totalPriceUsd',
+      defaultSortOrder: 'descend',
+      sorter: (a, b) => Number(a.totalPriceUsd) - Number(b.totalPriceUsd),
       render: (value: string) =>
         `$${Number(value).toLocaleString(undefined, {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         })}`,
-    },
-    {
-      title: 'Average price',
-      dataIndex: 'avgPriceUsdCents',
-      key: 'avgPriceUsdCents',
-      render: (value: number | null) =>
-        value !== null
-          ? `$${(value / 100).toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}`
-          : '-',
     },
     {
       title: 'Profit',
@@ -158,6 +227,65 @@ export const CryptoPositionsTable = ({
         );
       },
     },
+    {
+      title: 'Actions',
+      key: 'actions',
+      render: (_, position) => {
+        const amountChanged =
+          editedAmounts[position.id] !== undefined &&
+          editedAmounts[position.id] !== position.amount;
+
+        const originalAvgPriceUsd =
+          position.avgPriceUsdCents === null ? '' : String(position.avgPriceUsdCents / 100);
+
+        const avgPriceChanged =
+          editedAvgPrices[position.id] !== undefined &&
+          editedAvgPrices[position.id] !== originalAvgPriceUsd;
+
+        const hasChanges = amountChanged || avgPriceChanged;
+
+        const isSaving = savingPositionId === position.id;
+        const isDeleting = deletingPositionId === position.id;
+
+        return (
+          <Space>
+            {hasChanges && (
+              <>
+                <Button
+                  type="primary"
+                  loading={isSaving}
+                  disabled={isDeleting}
+                  onClick={() => void handleSave(position)}
+                >
+                  Save
+                </Button>
+
+                <Button disabled={isSaving || isDeleting} onClick={() => handleCancel(position.id)}>
+                  Cancel
+                </Button>
+              </>
+            )}
+
+            <Popconfirm
+              title="Delete crypto position?"
+              description={`Are you sure you want to delete ${position.ticker.toUpperCase()}?`}
+              okText="Delete"
+              cancelText="Cancel"
+              okButtonProps={{
+                danger: true,
+                loading: isDeleting,
+              }}
+              disabled={isSaving || isDeleting}
+              onConfirm={() => handleDelete(position)}
+            >
+              <Button danger loading={isDeleting} disabled={isSaving}>
+                Delete
+              </Button>
+            </Popconfirm>
+          </Space>
+        );
+      },
+    },
   ];
 
   return (
@@ -167,6 +295,7 @@ export const CryptoPositionsTable = ({
       columns={columns}
       loading={loading}
       pagination={false}
+      scroll={{ x: 1000 }}
     />
   );
 };
