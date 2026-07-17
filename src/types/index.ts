@@ -4,3 +4,4 @@ export * from './CryptoPosition';
 export * from './RealEstate';
 export * from './User';
 export * from './Stock';
+export * from './CryptoCoin';

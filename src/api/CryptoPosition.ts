@@ -11,11 +11,13 @@ export const deleteCryptoPosition = async (id: string) => {
 export const createCryptoPosition = async (
   ticker: string,
   amount: string,
+  coinId: string,
   avgPriceUSDCents?: number,
 ) => {
   return apiClient.post('/cryptos', {
     ticker,
     amount,
+    coin_id: coinId,
     avg_price_usd_cents: avgPriceUSDCents,
   });
 };

@@ -59,9 +59,10 @@ export const CryptoPage = () => {
   const handleCreatePosition = async (
     ticker: string,
     amount: string,
+    coinId: string,
     avgPriceUsdCents?: number,
   ) => {
-    await createCryptoPosition(ticker, amount, avgPriceUsdCents);
+    await createCryptoPosition(ticker, amount, coinId, avgPriceUsdCents);
 
     await getData();
 
