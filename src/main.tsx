@@ -7,23 +7,41 @@ import { RegistrationPage } from '@/pages/Registration/Registration.tsx';
 import { CryptoPage } from '@/pages/Crypto/Crypto.tsx';
 import 'antd/dist/reset.css';
 import { ConfigProvider, theme } from 'antd';
+import { Layout } from '@/layout/Layout/Layout';
 
-const router = createBrowserRouter([
+export const router = createBrowserRouter([
   {
-    path: '/',
-    Component: HomePage,
-  },
-  {
-    path: '/crypto',
-    Component: CryptoPage,
-  },
-  {
-    path: '/login',
-    Component: LoginPage,
-  },
-  {
-    path: '/registration',
-    Component: RegistrationPage,
+    element: <Layout />,
+    children: [
+      {
+        path: '/',
+        element: <HomePage />,
+      },
+      {
+        path: '/crypto',
+        element: <CryptoPage />,
+      },
+      {
+        path: '/login',
+        element: <LoginPage />,
+      },
+      {
+        path: '/registration',
+        element: <RegistrationPage />,
+      },
+      // {
+      //   path: '/deposits',
+      //   element: <DepositsPage />,
+      // },
+      // {
+      //   path: '/securities',
+      //   element: <SecuritiesPage />,
+      // },
+      // {
+      //   path: '/real-estate',
+      //   element: <RealEstatePage />,
+      // },
+    ],
   },
 ]);
 
