@@ -1,13 +1,18 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { HomePage } from '@/pages/Home/Home.tsx';
-import { LoginPage } from '@/pages/Login/Login.tsx';
-import { RegistrationPage } from '@/pages/Registration/Registration.tsx';
-import { CryptoPage } from '@/pages/Crypto/Crypto.tsx';
 import 'antd/dist/reset.css';
 import { ConfigProvider, theme } from 'antd';
+
 import { Layout } from '@/layout/Layout/Layout';
+
+import { RegistrationPage } from '@/pages/Registration/Registration.tsx';
+import { CryptoPage } from '@/pages/Crypto/Crypto.tsx';
+import { HomePage } from '@/pages/Home/Home.tsx';
+import { LoginPage } from '@/pages/Login/Login.tsx';
+import { BankDepositPage } from '@/pages/BankDeposit/BankDeposit';
+import { RealEstatePage } from '@/pages/RealEstate/RealEstate';
+import { SecuritiesPage } from '@/pages/Securities/Securities';
 
 export const router = createBrowserRouter([
   {
@@ -29,18 +34,18 @@ export const router = createBrowserRouter([
         path: '/registration',
         element: <RegistrationPage />,
       },
-      // {
-      //   path: '/deposits',
-      //   element: <DepositsPage />,
-      // },
-      // {
-      //   path: '/securities',
-      //   element: <SecuritiesPage />,
-      // },
-      // {
-      //   path: '/real-estate',
-      //   element: <RealEstatePage />,
-      // },
+      {
+        path: '/deposits',
+        element: <BankDepositPage />,
+      },
+      {
+        path: '/securities',
+        element: <SecuritiesPage />,
+      },
+      {
+        path: '/real-estate',
+        element: <RealEstatePage />,
+      },
     ],
   },
 ]);

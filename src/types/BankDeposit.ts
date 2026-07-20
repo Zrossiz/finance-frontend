@@ -6,5 +6,14 @@ export type BankDeposit = {
   amountCents: number;
   interestRate: string;
   openedAt: string;
-  closedAt: string | null;
+  periodMonths: number;
+};
+
+export type CreateBankDeposit = {
+  name: string;
+  currency: string;
+  amountCents: number;
+  interestRate: string;
+  openedAt: Date;
+  periodMonths: number;
 };
