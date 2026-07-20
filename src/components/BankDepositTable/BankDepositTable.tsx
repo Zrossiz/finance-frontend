@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, message, Popconfirm, Space, Table, Tag, Tooltip, Typography } from 'antd';
+import { Button, message, Popconfirm, Space, Table, Tooltip, Typography } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 
 import type { ColumnsType } from 'antd/es/table';
@@ -63,36 +63,21 @@ export const BankDepositTable = ({
       render: (name: string) => <Text strong>{name}</Text>,
     },
     {
-      title: 'Currency',
-      dataIndex: 'currency',
-      key: 'currency',
-      filters: [
-        {
-          text: 'USD',
-          value: 'USD',
-        },
-        {
-          text: 'EUR',
-          value: 'EUR',
-        },
-        {
-          text: 'CHF',
-          value: 'CHF',
-        },
-        {
-          text: 'RUB',
-          value: 'RUB',
-        },
-      ],
-      onFilter: (value, deposit) => deposit.currency === value,
-      render: (currency: string) => <Tag>{currency.toUpperCase()}</Tag>,
-    },
-    {
       title: 'Amount',
       dataIndex: 'amountCents',
       key: 'amountCents',
       defaultSortOrder: 'descend',
       sorter: (a, b) => a.amountCents - b.amountCents,
+      render: (amountCents: number, deposit) => (
+        <Text>{formatMoney(amountCents, deposit.currency)}</Text>
+      ),
+    },
+    {
+      title: 'Total income',
+      dataIndex: 'totalIncomeCents',
+      key: 'totalIncomeCents',
+      defaultSortOrder: 'descend',
+      sorter: (a, b) => a.totalIncomeCents - b.totalIncomeCents,
       render: (amountCents: number, deposit) => (
         <Text>{formatMoney(amountCents, deposit.currency)}</Text>
       ),

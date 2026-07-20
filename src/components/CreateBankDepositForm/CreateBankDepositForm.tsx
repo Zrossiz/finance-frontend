@@ -19,16 +19,16 @@ type CreateBankDepositFormProps = {
 
 const currencyOptions = [
   {
+    label: 'RUB — Russian Ruble',
+    value: 'RUB',
+  },
+  {
     label: 'USD — US Dollar',
     value: 'USD',
   },
   {
     label: 'EUR — Euro',
     value: 'EUR',
-  },
-  {
-    label: 'RUB — Russian Ruble',
-    value: 'RUB',
   },
 ];
 
@@ -79,7 +79,7 @@ export const CreateBankDepositForm = ({ onCreateDeposit }: CreateBankDepositForm
       form={form}
       layout="vertical"
       initialValues={{
-        currency: 'USD',
+        currency: 'RUB',
       }}
       onFinish={(values) => void handleFinish(values)}
     >

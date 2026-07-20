@@ -60,6 +60,14 @@ export const BankDepositPage = () => {
     total = deposits.reduce((sum, deposit) => sum + deposit.amountCents, 0);
   }
 
+  let totalPassiveIncomePerMonths = 0;
+  if (deposits.length > 0) {
+    totalPassiveIncomePerMonths = deposits.reduce(
+      (sum, deposit) => sum + deposit.incomeCentsPerMonth,
+      0,
+    );
+  }
+
   return (
     <div
       style={{
@@ -96,6 +104,15 @@ export const BankDepositPage = () => {
             Total amount:{' '}
             <Text strong>
               {(total / 100).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}
+            </Text>
+          </Text>
+
+          <Text type="secondary" style={{ marginLeft: '20px' }}>
+            Passive income per month:{' '}
+            <Text strong>
+              {(totalPassiveIncomePerMonths / 100).toLocaleString(undefined, {
                 minimumFractionDigits: 2,
               })}
             </Text>
